@@ -1,60 +1,269 @@
 <!DOCTYPE html>
-<!-- 声明文档类型为HTML5 -->
 <html lang="zh-CN">
 <head>
-    <!-- 网页元信息：字符编码、适配手机、标题 -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>我的个人主页</title>
     <style>
-        /* 简单CSS样式：让页面更整齐 */
+        /* 基础样式与颜色设置 */
+        :root {
+            --primary-color: #4a6fa5; /* 主色调 - 蓝色 */
+            --secondary-color: #c8d8e4; /* 辅助色 - 浅蓝色 */
+            --accent-color: #f2b880; /* 强调色 - 橙色 */
+            --text-color: #2d3142; /* 文字颜色 - 深灰色 */
+            --light-bg: #f8f9fa; /* 浅色背景 */
+            --card-shadow: 0 4px 8px rgba(0,0,0,0.1); /* 卡片阴影 */
+            --hover-shadow: 0 8px 16px rgba(0,0,0,0.15); /* 悬停阴影 */
+        }
+
         body {
             font-family: "微软雅黑", sans-serif;
-            max-width: 800px; /* 限制页面宽度，避免在宽屏上太分散 */
-            margin: 0 auto;   /* 让页面水平居中 */
+            max-width: 800px;
+            margin: 0 auto;
             padding: 20px;
-            background-color: #f5f5f5; /* 浅灰色背景 */
+            background-color: var(--light-bg);
+            color: var(--text-color);
+            line-height: 1.6;
+            transition: background-color 0.5s ease;
         }
+
+        /* 头部样式 */
         .header {
-            text-align: center; /* 标题和头像居中 */
-            margin-bottom: 30px;
+            text-align: center;
+            margin: 30px 0 50px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--secondary-color);
+            animation: fadeIn 1s ease-in;
         }
+
         .profile-img {
             width: 150px;
-            border-radius: 50%; /* 圆形头像 */
-            border: 3px solid #333;
-        }
-        .section {
-            background-color: white; /* 白色板块，区分背景 */
-            padding: 20px;
+            height: 150px;
+            border-radius: 50%;
+            border: 4px solid var(--primary-color);
+            object-fit: cover;
             margin-bottom: 20px;
-            border-radius: 8px; /* 圆角边框 */
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .profile-img:hover {
+            transform: scale(1.05) rotate(3deg);
+            box-shadow: 0 0 20px rgba(74, 111, 165, 0.3);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin: 10px 0;
+            position: relative;
+            display: inline-block;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 10%;
+            width: 80%;
+            height: 3px;
+            background-color: var(--accent-color);
+            transform: scaleX(0);
+            transform-origin: center;
+            transition: transform 0.3s ease;
+        }
+
+        h1:hover::after {
+            transform: scaleX(1);
+        }
+
+        /* 板块通用样式 */
+        .section {
+            background-color: white;
+            padding: 25px;
+            margin-bottom: 30px;
+            border-radius: 10px;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .section:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--hover-shadow);
+        }
+
+        .section h2 {
+            color: var(--primary-color);
+            border-left: 4px solid var(--accent-color);
+            padding-left: 15px;
+            margin-top: 0;
+        }
+
+        /* 作品板块样式 */
+        .projects {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .project-item {
+            border: 1px solid var(--secondary-color);
+            border-radius: 8px;
+            padding: 15px;
+            transition: all 0.3s ease;
+            background-color: white;
+        }
+
+        .project-item:hover {
+            transform: translateY(-8px) scale(1.02);
+            border-color: var(--primary-color);
+        }
+
+        .project-title {
+            color: var(--primary-color);
+            margin-top: 0;
+        }
+
+        /* 链接样式 */
+        a {
+            color: var(--primary-color);
+            text-decoration: none;
+            position: relative;
+        }
+
+        a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--accent-color);
+            transition: width 0.3s ease;
+        }
+
+        a:hover::after {
+            width: 100%;
+        }
+
+        /* 列表样式 */
+        ul {
+            padding-left: 20px;
+        }
+
+        li {
+            margin: 8px 0;
+            transition: transform 0.2s ease;
+        }
+
+        li:hover {
+            transform: translateX(5px);
+        }
+
+        /* 动画定义 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 深色模式切换按钮 */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--accent-color);
+            transform: scale(1.1);
+        }
+
+        /* 深色模式样式 */
+        .dark-mode {
+            --light-bg: #2d3142;
+            --text-color: #f8f9fa;
+            --primary-color: #91b3bc;
+            --secondary-color: #4a5859;
+        }
+
+        .dark-mode .section {
+            background-color: #3d4551;
         }
     </style>
 </head>
 <body>
-    <!-- 头部：头像+名字+简介 -->
+    <!-- 深色模式切换按钮 -->
+    <button class="theme-toggle" onclick="toggleTheme()">切换主题</button>
+
     <div class="header">
-        <!-- 注意：这里的图片地址需要替换成你自己的图片（本地图片需和HTML同目录，或用网络图片URL） -->
-       <img src="images/profile.jpg" alt="我的头像" class="profile-img">
-        <h1>姚逸菲的网站</h1>
+        <img src="images/profile.jpg" alt="我的头像" class="profile-img">
+        <h1>xxx的网站</h1>
         <p>啥都不会desu | trytry</p>
     </div>
 
-    <!-- 关于我板块 -->
     <div class="section">
         <h2>about me</h2>
         <p>学吧学吧</p>
         <p>nothing</p>
     </div>
 
-    <!-- 联系方式板块 -->
+    <!-- 作品板块 -->
+    <div class="section">
+        <h2>我的作品</h2>
+        
+        <div class="projects">
+            <div class="project-item">
+                <h3 class="project-title">项目一</h3>
+                <p>这是我的第一个项目，一个简单的网页应用。</p>
+                <a href="https://github.com/你的用户名/项目1仓库名" class="project-link" target="_blank">查看项目 →</a>
+            </div>
+            
+            <div class="project-item">
+                <h3 class="project-title">设计作品集</h3>
+                <p>我的设计作品集合，包含多种创意设计。</p>
+                <a href="designs/" class="project-link" target="_blank">浏览作品 →</a>
+            </div>
+            
+            <div class="project-item">
+                <h3 class="project-title">个人博客</h3>
+                <p>我的技术博客，记录学习过程和心得。</p>
+                <a href="blog.html" class="project-link" target="_self">访问博客 →</a>
+            </div>
+        </div>
+    </div>
+
     <div class="section">
         <h2>联系方式</h2>
         <ul>
-            <li>邮箱：79699996@qq.com</li>
+            <li>邮箱：xxx</li>
             <li>GitHub：<a href="https://github.com/你的GitHub用户名" target="_blank">github.com/你的GitHub用户名</a></li>
         </ul>
     </div>
+
+    <script>
+        // 主题切换功能
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            // 保存主题偏好到本地存储
+            if (document.body.classList.contains('dark-mode')) {
+                localStorage.setItem('theme', 'dark');
+            } else {
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        // 页面加载时恢复保存的主题
+        window.onload = function() {
+            if (localStorage.getItem('theme') === 'dark') {
+                document.body.classList.add('dark-mode');
+            }
+        }
+    </script>
 </body>
 </html>
