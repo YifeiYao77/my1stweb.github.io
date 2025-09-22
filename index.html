@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<!-- 声明文档类型为HTML5 -->
+<html lang="zh-CN">
+<head>
+    <!-- 网页元信息：字符编码、适配手机、标题 -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的个人主页</title>
+    <style>
+        /* 简单CSS样式：让页面更整齐 */
+        body {
+            font-family: "微软雅黑", sans-serif;
+            max-width: 800px; /* 限制页面宽度，避免在宽屏上太分散 */
+            margin: 0 auto;   /* 让页面水平居中 */
+            padding: 20px;
+            background-color: #f5f5f5; /* 浅灰色背景 */
+        }
+        .header {
+            text-align: center; /* 标题和头像居中 */
+            margin-bottom: 30px;
+        }
+        .profile-img {
+            width: 150px;
+            border-radius: 50%; /* 圆形头像 */
+            border: 3px solid #333;
+        }
+        .section {
+            background-color: white; /* 白色板块，区分背景 */
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px; /* 圆角边框 */
+        }
+    </style>
+</head>
+<body>
+    <!-- 头部：头像+名字+简介 -->
+    <div class="header">
+        <!-- 注意：这里的图片地址需要替换成你自己的图片（本地图片需和HTML同目录，或用网络图片URL） -->
+        <img src="profile.jpg" alt="我的头像" class="profile-img">
+        <h1>张三</h1>
+        <p>一名热爱技术的前端开发者 | 喜欢分享编程笔记</p>
+    </div>
+
+    <!-- 关于我板块 -->
+    <div class="section">
+        <h2>关于我</h2>
+        <p>毕业于XX大学计算机专业，有2年前端开发经验，熟悉HTML/CSS/JavaScript，擅长用Vue框架搭建项目。</p>
+        <p>平时喜欢写技术博客，记录学习过程中的问题和解决方案。</p>
+    </div>
+
+    <!-- 联系方式板块 -->
+    <div class="section">
+        <h2>联系方式</h2>
+        <ul>
+            <li>邮箱：zhangsan@example.com</li>
+            <li>GitHub：<a href="https://github.com/你的GitHub用户名" target="_blank">github.com/你的GitHub用户名</a></li>
+            <li>博客：<a href="https://你的博客地址" target="_blank">我的技术博客</a></li>
+        </ul>
+    </div>
+</body>
+</html>
