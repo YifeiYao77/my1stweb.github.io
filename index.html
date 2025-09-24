@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>我的个人主页</title>
     <style>
-        /* 基础样式与颜色设置 */
+        /* 基础样式与颜色设置 - 蓝色主题为默认 */
         :root {
             --primary-color: #9edaff; /* 主色调 - 蓝色 */
             --secondary-color: #c8d8e4; /* 辅助色 - 浅蓝色 */
@@ -25,6 +25,52 @@
             color: var(--text-color);
             line-height: 1.6;
             transition: background-color 0.5s ease;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* 樱花效果容器 */
+        .sakura-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+            overflow: hidden;
+            display: none; /* 默认不显示樱花容器 */
+        }
+
+        /* 粉色主题下显示樱花容器 */
+        .dark-mode .sakura-container {
+            display: block;
+        }
+
+        .sakura {
+            position: absolute;
+            background-color: #ffccd5;
+            border-radius: 50% 50% 50% 0;
+            animation: fall linear infinite;
+            opacity: 0.7;
+        }
+
+        /* 樱花飘落动画 */
+        @keyframes fall {
+            0% {
+                transform: translate(0, 0) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.8;
+            }
+            90% {
+                opacity: 0.8;
+            }
+            100% {
+                transform: translate(calc(var(--horizontal-distance) * 1px), 100vh) rotate(360deg);
+                opacity: 0;
+            }
         }
 
         /* 头部样式 */
@@ -34,6 +80,8 @@
             padding-bottom: 20px;
             border-bottom: 2px solid var(--secondary-color);
             animation: fadeIn 1s ease-in;
+            position: relative;
+            z-index: 10;
         }
 
         .profile-img {
@@ -83,6 +131,8 @@
             border-radius: 10px;
             box-shadow: var(--card-shadow);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            z-index: 10;
         }
 
         .section:hover {
@@ -165,7 +215,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* 深色模式切换按钮 */
+        /* 主题切换按钮 */
         .theme-toggle {
             position: fixed;
             top: 20px;
@@ -177,6 +227,7 @@
             border-radius: 20px;
             cursor: pointer;
             transition: all 0.3s ease;
+            z-index: 1000;
         }
 
         .theme-toggle:hover {
@@ -184,23 +235,32 @@
             transform: scale(1.1);
         }
 
-        /* 深色模式样式 */
+        /* 粉色主题样式 */
         .dark-mode {
-            --primary-color: #fab4b4; /* 主色调 - 蓝色 */
-            --secondary-color: #c8d8e4; /* 辅助色 - 浅蓝色 */
-            --accent-color: #faefc5; /* 强调色 - 绿 */
-            --text-color: #2d3142; /* 文字颜色 - 深灰色 */
-            --light-bg: #fadcdc; /* 浅色背景 */
+            --primary-color: #ff9eb1; /* 主色调 - 粉色 */
+            --secondary-color: #ffd6dc; /* 辅助色 - 浅粉色 */
+            --accent-color: #ffc2d1; /* 强调色 - 深粉色 */
+            --text-color: #5a4b51; /* 文字颜色 - 深灰粉色 */
+            --light-bg: #fff5f7; /* 浅色背景 */
+            --card-shadow: 0 4px 8px rgba(255,158,177,0.2); /* 卡片阴影 */
+            --hover-shadow: 0 8px 16px rgba(255,158,177,0.3); /* 悬停阴影 */
         }
 
         .dark-mode .section {
             background-color: #fff7f7;
+        }
+
+        .dark-mode .profile-img:hover {
+            box-shadow: 0 0 20px rgba(255,158,177,0.3);
         }
     </style>
 </head>
 <body>
     <!-- 深色模式切换按钮 -->
     <button class="theme-toggle" onclick="toggleTheme()">切换主题</button>
+
+    <!-- 樱花效果容器 -->
+    <div class="sakura-container" id="sakuraContainer"></div>
 
     <div class="header">
         <img src="images/profile.jpg" alt="我的头像" class="profile-img">
@@ -254,8 +314,12 @@
             // 保存主题偏好到本地存储
             if (document.body.classList.contains('dark-mode')) {
                 localStorage.setItem('theme', 'dark');
+                // 粉色主题下创建樱花
+                createSakuras();
             } else {
                 localStorage.setItem('theme', 'light');
+                // 蓝色主题下清除樱花
+                clearSakuras();
             }
         }
 
@@ -263,7 +327,97 @@
         window.onload = function() {
             if (localStorage.getItem('theme') === 'dark') {
                 document.body.classList.add('dark-mode');
+                // 粉色主题下创建樱花
+                createSakuras();
+                startSakuraInterval();
+            } else {
+                // 蓝色主题下确保樱花已清除
+                clearSakuras();
             }
+        }
+
+        // 樱花效果实现
+        const sakuraContainer = document.getElementById('sakuraContainer');
+        const totalSakuras = 30; // 初始樱花数量
+        let sakuraInterval;
+
+        // 创建初始樱花
+        function createSakuras() {
+            // 清除现有樱花
+            clearSakuras();
+            
+            // 创建新樱花
+            for (let i = 0; i < totalSakuras; i++) {
+                addSakura();
+            }
+        }
+
+        // 清除所有樱花
+        function clearSakuras() {
+            sakuraContainer.innerHTML = '';
+            // 清除定时器
+            if (sakuraInterval) {
+                clearInterval(sakuraInterval);
+                sakuraInterval = null;
+            }
+        }
+
+        // 开始定时添加樱花
+        function startSakuraInterval() {
+            if (!sakuraInterval) {
+                sakuraInterval = setInterval(addSakura, 800);
+            }
+        }
+
+        // 添加单个樱花
+        function addSakura() {
+            // 只有在粉色主题下才添加樱花
+            if (!document.body.classList.contains('dark-mode')) {
+                return;
+            }
+            
+            const sakura = document.createElement('div');
+            sakura.classList.add('sakura');
+            
+            // 随机大小
+            const size = Math.random() * 8 + 3;
+            sakura.style.width = `${size}px`;
+            sakura.style.height = `${size}px`;
+            
+            // 随机位置
+            sakura.style.left = `${Math.random() * 100}vw`;
+            sakura.style.top = `-${size}px`;
+            
+            // 随机水平偏移距离
+            const horizontalDistance = (Math.random() - 0.5) * 200;
+            sakura.style.setProperty('--horizontal-distance', horizontalDistance);
+            
+            // 随机旋转角度
+            sakura.style.transform = `rotate(${Math.random() * 360}deg)`;
+            
+            // 随机动画持续时间
+            const duration = Math.random() * 10 + 10;
+            sakura.style.animationDuration = `${duration}s`;
+            
+            // 随机动画延迟
+            sakura.style.animationDelay = `${Math.random() * 10}s`;
+            
+            // 粉色主题下的樱花颜色
+            const hue = Math.random() * 20 + 340; // 粉色色调范围
+            const lightness = Math.random() * 10 + 85;
+            sakura.style.backgroundColor = `hsl(${hue}, 100%, ${lightness}%)`;
+            
+            sakuraContainer.appendChild(sakura);
+            
+            // 动画结束后移除元素
+            setTimeout(() => {
+                sakura.remove();
+            }, (duration + 1) * 1000);
+        }
+    </script>
+</body>
+</html>
+
         }
     </script>
 </body>
