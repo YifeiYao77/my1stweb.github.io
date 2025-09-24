@@ -504,11 +504,45 @@
             transform: scale(1.1);
         }
 
-        /* 粉色主题样式 */
+                /* 粉色主题样式 */
         .dark-mode {
             --primary-color: #ff9eb1; /* 主色调 - 粉色 */
             --secondary-color: #ffd6dc; /* 辅助色 - 浅粉色 */
             --accent-color: #ffc2d1; /* 强调色 - 深粉色 */
             --text-color: #5a4b51; /* 文字颜色 - 深灰粉色 */
             --light-bg: #fff5f7; /* 浅色背景 */
-            --card-shadow: 0 4
+            --card-shadow: 0 4px 8px rgba(255,158,177,0.2); /* 卡片阴影 */
+            --hover-shadow: 0 8px 16px rgba(255,158,177,0.3); /* 悬停阴影 */
+        }
+
+        .dark-mode .content {
+            background-color: #fff7f7;
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .wooden-fish {
+                left: 10px;
+            }
+            
+            .fish-icon {
+                width: 60px;
+                height: 60px;
+            }
+            
+            .fish-icon i {
+                font-size: 24px;
+            }
+            
+            .pdf-gallery {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            }
+            
+            .pdf-viewer {
+                padding: 20px;
+            }
+            
+            .content {
+                padding: 20px 15px;
+            }
+        }
