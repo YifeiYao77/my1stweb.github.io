@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>设计作品集 | yyf的网页</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 保持与主页面一致的样式风格 */
+        :root {
+            --primary-color: #9edaff; /* 主色调 - 蓝色 */
+            --secondary-color: #c8d8e4; /* 辅助色 - 浅蓝色 */
+            --accent-color: #a9ebab; /* 强调色 - 绿 */
+            --text-color: #2d3142; /* 文字颜色 - 深灰色 */
+            --light-bg: #dcf2f5; /* 浅色背景 */
+            --card-shadow: 0 4px 8px rgba(0,0,0,0.1); /* 卡片阴影 */
+            --hover-shadow: 0 8px 16px rgba(0,0,0,0.15); /* 悬停阴影 */
+        }
+
+        body {
+            font-family: "微软雅黑", sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: var(--light-bg);
+            color: var(--text-color);
+            line-height: 1.6;
+            transition: background-color 0.5s ease;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* 樱花效果容器 */
+        .sakura-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+            overflow: hidden;
+            display: none; /* 默认不显示樱花容器 */
+        }
+
+        /* 粉色主题下显示樱花容器 */
+        .dark-mode .sakura-container {
+            display: block;
+        }
+
+        .sakura {
+            position: absolute;
+            background-color: #ffccd5;
+            border-radius: 50% 50% 50% 0;
+            animation: fall linear infinite;
+            opacity: 0.7;
+        }
+
+        /* 樱花飘落动画 */
+        @keyframes fall {
+            0% {
+                transform: translate(0, 0) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.8;
+            }
+            90% {
+                opacity: 0.8;
+            }
+            100% {
+                transform: translate(calc(var(--horizontal-distance) * 1px), 100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* 电子木鱼样式 */
+        .wooden-fish {
+            position: fixed;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 90;
+            transition: all 0.3s ease;
+        }
+
+        .fish-icon {
+            width: 80px;
+            height: 80px;
+            background-color: #e6c8a0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transition: all 0.1s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .fish-icon::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.3), transparent 60%);
+            pointer-events: none;
+        }
+
+        .fish-icon i {
+            font-size: 36px;
+            color: #8b5a2b;
+        }
+
+        .fish-icon:active {
+            transform: scale(0.95);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .merit-count {
+            margin-top: 15px;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 8px 15px;
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            font-weight: bold;
+            color: #8b5a2b;
+        }
+
+        .reset-merit {
+            margin-top: 10px;
+            background-color: transparent;
+            border: 1px solid #8b5a2b;
+            color: #8b5a2b;
+            padding: 3px 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .reset-merit:hover {
+            background-color: #8b5a2b;
+            color: white;
+        }
+
+        .merit-popup {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #d4af37;
+            font-weight: bold;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translate(-50%, 0);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-50%, -30px);
+                opacity: 0;
+            }
+        }
+
+        /* 头部样式 */
+        .header {
+            text-align: center;
+            margin: 30px 0 50px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--secondary-color);
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 16px;
+        }
+
+        .back-link i {
+            margin-right: 5px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin: 10px 0;
+            position: relative;
+            display: inline-block;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 10%;
+            width: 80%;
+            height: 3px;
+            background-color: var(--accent-color);
+        }
+
+        /* 主要内容区 */
+        .content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 30px;
+        }
+
+        /* PDF作品展示样式 */
+        .pdf-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+        
+        .pdf-item {
+            border: 1px solid var(--secondary-color);
+            border-radius: 8px;
+            padding: 20px 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .pdf-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.1) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .pdf-item:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--hover-shadow);
+            border-color: var(--primary-color);
+        }
+        
+        .pdf-item:hover::before {
+            opacity: 1;
+        }
+        
+        .pdf-icon {
+            font-size: 56px;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            transition: transform 0.3s ease;
+        }
+        
+        .pdf-item:hover .pdf-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+        
+        .pdf-title {
+            color: var(--primary-color);
+            margin: 0 0 10px 0;
+            font-size: 18px;
+        }
+        
+        .pdf-description {
+            color: var(--text-color);
+            font-size: 14px;
+            margin: 0;
+        }
+
+        /* PDF查看器弹窗 */
+        .pdf-viewer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 40px;
+            box-sizing: border-box;
+        }
+        
+        .pdf-viewer.active {
+            display: flex;
+        }
+        
+        .pdf-container {
+            width: 100%;
+            max-width: 1200px;
+            height: 90vh;
+            background-color: white;
+            border-radius: 8px;
+            position: relative;
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            color: white;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 1001;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background-color 0.3s ease;
+        }
+        
+        .close-btn:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .pdf-embed {
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 8px;
+        }
+
+        /* 主题切换按钮 */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--accent-color);
+            transform: scale(1.1);
+        }
+
+        /* 粉色主题样式 */
+        .dark-mode {
+            --primary-color: #ff9eb1; /* 主色调 - 粉色 */
+            --secondary-color: #ffd6dc; /* 辅助色 - 浅粉色 */
+            --accent-color: #ffc2d1; /* 强调色 - 深粉色 */
+            --text-color: #5a4b51; /* 文字颜色 - 深灰粉色 */
+            --light-bg: #fff5f7; /* 浅色背景 */
+            --card-shadow: 0 4px 8px rgba(255,158,177,0.2); /* 卡片阴影 */
+            --hover-shadow: 0 8px 16px rgba(255,158,177,0.3); /* 悬停阴影 */
+        }
+
+        .dark-mode .content {
+            background-color: #fff7f7;
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .wooden-fish {
+                left: 10px;
+            }
+            
+            .fish-icon {
+                width: 60px;
+                height: 60px;
+            }
+            
+            .fish-icon i {
+                font-size: 24px;
+            }
+            
+            .pdf-gallery {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            }
+            
+            .pdf-viewer {
+                padding: 20px;
+            }
+            
+            .content {
+                padding: 20px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 深色模式切换按钮 -->
+    <button class="theme-toggle" onclick="toggleTheme()">切换主题</button>
+
+    <!-- 电子木鱼区域 -->
+    <div class="wooden-fish">
+        <div class="fish-icon" id="fishIcon">
+            <i class="fas fa-drum"></i>
+            <div class="merit-popup" id="meritPopup">功德+1</div>
+        </div>
+        <div class="merit-count">功德: <span id="meritCount">0</span></div>
+        <button class="reset-merit" id="resetMerit">重置功德</button>
+    </div>
+
+    <!-- 樱花效果容器 -->
+    <div class="sakura-container" id="sakuraContainer"></div>
+
+    <div class="header">
+        <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> 返回主页</a>
+        <h1>设计作品集</h1>
+        <p>以下是我的设计作品PDF文档，点击可查看详情</p>
+    </div>
+
+    <div class="content">
+        <div class="pdf-gallery" id="pdfGallery">
+            <!-- PDF作品项1 -->
+            <div class="pdf-item" data-pdf="作品1.pdf">
+                <i class="fas fa-file-pdf pdf-icon"></i>
+                <h3 class="pdf-title">课程报告1</h3>
+                <p class="pdf-description">计算机图形学课程设计报告，包含详细实现过程</p>
+            </div>
+            
+            <!-- PDF作品项2 -->
+            <div class="pdf-item" data-pdf="作品2.pdf">
+                <i class="fas fa-file-pdf pdf-icon"></i>
+                <h3 class="pdf-title">UI设计方案</h3>
+                <p class="pdf-description">移动应用界面设计方案，包含原型与视觉设计</p>
+            </div>
+            
+            <!-- PDF作品项3 -->
+            <div class="pdf-item" data-pdf="作品3.pdf">
+                <i class="fas fa-file-pdf pdf-icon"></i>
+                <h3 class="pdf-title">研究论文</h3>
+                <p class="pdf-description">相关领域研究论文，包含实验数据与分析</p>
+            </div>
+            
+            <!-- PDF作品项4 -->
+            <div class="pdf-item" data-pdf="作品4.pdf">
+                <i class="fas fa-file-pdf pdf-icon"></i>
+                <h3 class="pdf-title">毕业设计</h3>
+                <p class="pdf-description">毕业设计完整文档，包含全部设计与实现细节</p>
+            </div>
+            
+            <!-- PDF作品项5 -->
+            <div class="pdf-item" data-pdf="作品5.pdf">
+                <i class="fas fa-file-pdf pdf-icon"></i>
+                <h3 class="pdf-title">创意作品集</h3>
+                <p class="pdf-description">各类创意设计作品集合，包含草图与成品展示</p>
+            </div>
+            
+            <!-- PDF作品项6 -->
+            <div class="pdf-item" data-pdf="作品6.pdf">
+                <i class="fas fa-file-pdf pdf-icon"></i>
+                <h3 class="pdf-title">项目计划书</h3>
+                <p class="pdf-description">完整的项目规划与实施计划文档</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- PDF查看器弹窗 -->
+    <div class="pdf-viewer" id="pdfViewer">
+        <button class="close-btn" id="closePdf">&times;</button>
+        <div class="pdf-container">
+            <embed id="pdfEmbed" class="pdf-embed" type="application/pdf">
+        </div>
+    </div>
+
+    <script>
+        // 电子木鱼功能 - 带有本地存储
+        let meritCount = localStorage.getItem('muyuMeritCount') ? parseInt(localStorage.getItem('muyuMeritCount')) : 0;
+        const fishIcon = document.getElementById('fishIcon');
+        const meritCountElement = document.getElementById('meritCount');
+        const meritPopup = document.getElementById('meritPopup');
+        const resetButton = document.getElementById('resetMerit');
+        
+        // 初始化显示保存的功德值
+        meritCountElement.textContent = meritCount;
+        
+        // 创建敲击音效
+        const createSound = () => {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(500, audioContext.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
+            
+            gainNode.gain.setValueAtTime(1, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
+            
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.5);
+        };
+        
+        // 点击木鱼事件
+        fishIcon.addEventListener('click', () => {
+            meritCount++;
+            meritCountElement.textContent = meritCount;
+            localStorage.setItem('muyuMeritCount', meritCount.toString());
+            
+            meritPopup.style.animation = 'none';
+            meritPopup.offsetHeight;
+            meritPopup.style.animation = 'floatUp 0.8s ease-out forwards';
+            
+            createSound();
+        });
+        
+        // 重置功德按钮事件
+        resetButton.addEventListener('click', () => {
+            if (confirm('确定要重置功德计数吗？')) {
+                meritCount = 0;
+                meritCountElement.textContent = meritCount;
+                localStorage.removeItem('muyuMeritCount');
+            }
+        });
+
+        // PDF查看功能
+        const pdfGallery = document.getElementById('pdfGallery');
+        const pdfViewer = document.getElementById('pdfViewer');
+        const pdfEmbed = document.getElementById('pdfEmbed');
+        const closePdf = document.getElementById('closePdf');
+        
+        // 点击PDF项打开查看器
+        pdfGallery.addEventListener('click', (e) => {
+            const pdfItem = e.target.closest('.pdf-item');
+            if (pdfItem) {
+                const pdfUrl = pdfItem.getAttribute('data-pdf');
+                // 设置PDF源
+                pdfEmbed.src = pdfUrl;
+                // 显示查看器
+                pdfViewer.classList.add('active');
+                // 阻止页面滚动
+                document.body.style.overflow = 'hidden';
+            }
+        });
+        
+        // 关闭PDF查看器
+        closePdf.addEventListener('click', () => {
+            pdfViewer.classList.remove('active');
+            pdfEmbed.src = '';
+            // 恢复页面滚动
+            document.body.style.overflow = '';
+        });
+        
+        // 点击查看器外部关闭
+        pdfViewer.addEventListener('click', (e) => {
+            if (e.target === pdfViewer) {
+                pdfViewer.classList.remove('active');
+                pdfEmbed.src = '';
+                document.body.style.overflow = '';
+            }
+        });
+
+        // 主题切换功能
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            if (document.body.classList.contains('dark-mode')) {
+                localStorage.setItem('theme', 'dark');
+                createSakuras();
+            } else {
+                localStorage.setItem('theme', 'light');
+                clearSakuras();
+            }
+        }
+
+        // 页面加载时恢复保存的主题
+        window.onload = function() {
+            if (localStorage.getItem('theme') === 'dark') {
+                document.body.classList.add('dark-mode');
+                createSakuras();
+                startSakuraInterval();
+            } else {
+                clearSakuras();
+            }
+        }
+
+        // 樱花效果实现
+        const sakuraContainer = document.getElementById('sakuraContainer');
+        const totalSakuras = 60;
+        let sakuraInterval;
+
+        function createSakuras() {
+            clearSakuras();
+            for (let i = 0; i < totalSakuras; i++) {
+                addSakura();
+            }
+        }
+
+        function clearSakuras() {
+            sakuraContainer.innerHTML = '';
+            if (sakuraInterval) {
+                clearInterval(sakuraInterval);
+                sakuraInterval = null;
+            }
+        }
+
+        function startSakuraInterval() {
+            if (!sakuraInterval) {
+                sakuraInterval = setInterval(addSakura, 800);
+            }
+        }
+
+        function addSakura() {
+            if (!document.body.classList.contains('dark-mode')) {
+                return;
+            }
+            
+            const sakura = document.createElement('div');
+            sakura.classList.add('sakura');
+            
+            const size = Math.random() * 8 + 3;
+            sakura.style.width = `${size}px`;
+            sakura.style.height = `${size}px`;
+            
+            sakura.style.left = `${Math.random() * 100}vw`;
+            sakura.style.top = `-${size}px`;
+            
+            const horizontalDistance = (Math.random() - 0.5) * 200;
+            sakura.style.setProperty('--horizontal-distance', horizontalDistance);
+            
+            sakura.style.transform = `rotate(${Math.random() * 360}deg)`;
+            
+            const duration = Math.random() * 10 + 10;
+            sakura.style.animationDuration = `${duration}s`;
+            
+            sakura.style.animationDelay = `${Math.random() * 10}s`;
+            
+            const hue = Math.random() * 20 + 340;
+            const lightness = Math.random() * 10 + 85;
+            sakura.style.backgroundColor = `hsl(${hue}, 100%, ${lightness}%)`;
+            
+            sakuraContainer.appendChild(sakura);
+            
+            setTimeout(() => {
+                sakura.remove();
+            }, (duration + 1) * 1000);
+        }
+    </script>
+</body>
+</html>
+    
