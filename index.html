@@ -6,7 +6,7 @@
     <title>我的个人主页</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* 基础样式与颜色设置 - 蓝色主题为默认 */
+        /* 保持原有样式不变 */
         :root {
             --primary-color: #9edaff; /* 主色调 - 蓝色 */
             --secondary-color: #c8d8e4; /* 辅助色 - 浅蓝色 */
@@ -131,6 +131,23 @@
             box-shadow: var(--card-shadow);
             font-weight: bold;
             color: #8b5a2b;
+        }
+
+        .reset-merit {
+            margin-top: 10px;
+            background-color: transparent;
+            border: 1px solid #8b5a2b;
+            color: #8b5a2b;
+            padding: 3px 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .reset-merit:hover {
+            background-color: #8b5a2b;
+            color: white;
         }
 
         .merit-popup {
@@ -321,7 +338,7 @@
         .dark-mode {
             --primary-color: #ff9eb1; /* 主色调 - 粉色 */
             --secondary-color: #ffd6dc; /* 辅助色 - 浅粉色 */
-            --accent-color: #ffea96; /* 强调色 - 黄色 */
+            --accent-color: #ffc2d1; /* 强调色 - 深粉色 */
             --text-color: #5a4b51; /* 文字颜色 - 深灰粉色 */
             --light-bg: #fff5f7; /* 浅色背景 */
             --card-shadow: 0 4px 8px rgba(255,158,177,0.2); /* 卡片阴影 */
@@ -364,6 +381,7 @@
             <div class="merit-popup" id="meritPopup">功德+1</div>
         </div>
         <div class="merit-count">功德: <span id="meritCount">0</span></div>
+        <button class="reset-merit" id="resetMerit">重置功德</button>
     </div>
 
     <!-- 樱花效果容器 -->
@@ -421,11 +439,15 @@
     </div>
 
     <script>
-        // 电子木鱼功能
-        let meritCount = 0;
+        // 电子木鱼功能 - 带有本地存储
+        let meritCount = localStorage.getItem('muyuMeritCount') ? parseInt(localStorage.getItem('muyuMeritCount')) : 0;
         const fishIcon = document.getElementById('fishIcon');
         const meritCountElement = document.getElementById('meritCount');
         const meritPopup = document.getElementById('meritPopup');
+        const resetButton = document.getElementById('resetMerit');
+        
+        // 初始化显示保存的功德值
+        meritCountElement.textContent = meritCount;
         
         // 创建敲击音效
         const createSound = () => {
@@ -449,30 +471,34 @@
         
         // 点击木鱼事件
         fishIcon.addEventListener('click', () => {
-            // 增加功德计数
             meritCount++;
             meritCountElement.textContent = meritCount;
+            localStorage.setItem('muyuMeritCount', meritCount.toString());
             
-            // 显示功德+1动画
             meritPopup.style.animation = 'none';
-            meritPopup.offsetHeight; // 触发重绘
+            meritPopup.offsetHeight;
             meritPopup.style.animation = 'floatUp 0.8s ease-out forwards';
             
-            // 播放敲击音效
             createSound();
+        });
+        
+        // 重置功德按钮事件
+        resetButton.addEventListener('click', () => {
+            if (confirm('确定要重置功德计数吗？')) {
+                meritCount = 0;
+                meritCountElement.textContent = meritCount;
+                localStorage.removeItem('muyuMeritCount');
+            }
         });
 
         // 主题切换功能
         function toggleTheme() {
             document.body.classList.toggle('dark-mode');
-            // 保存主题偏好到本地存储
             if (document.body.classList.contains('dark-mode')) {
                 localStorage.setItem('theme', 'dark');
-                // 粉色主题下创建樱花
                 createSakuras();
             } else {
                 localStorage.setItem('theme', 'light');
-                // 蓝色主题下清除樱花
                 clearSakuras();
             }
         }
@@ -481,51 +507,40 @@
         window.onload = function() {
             if (localStorage.getItem('theme') === 'dark') {
                 document.body.classList.add('dark-mode');
-                // 粉色主题下创建樱花
                 createSakuras();
                 startSakuraInterval();
             } else {
-                // 蓝色主题下确保樱花已清除
                 clearSakuras();
             }
         }
 
         // 樱花效果实现
         const sakuraContainer = document.getElementById('sakuraContainer');
-        const totalSakuras = 60; // 初始樱花数量
+        const totalSakuras = 60;
         let sakuraInterval;
 
-        // 创建初始樱花
         function createSakuras() {
-            // 清除现有樱花
             clearSakuras();
-            
-            // 创建新樱花
             for (let i = 0; i < totalSakuras; i++) {
                 addSakura();
             }
         }
 
-        // 清除所有樱花
         function clearSakuras() {
             sakuraContainer.innerHTML = '';
-            // 清除定时器
             if (sakuraInterval) {
                 clearInterval(sakuraInterval);
                 sakuraInterval = null;
             }
         }
 
-        // 开始定时添加樱花
         function startSakuraInterval() {
             if (!sakuraInterval) {
                 sakuraInterval = setInterval(addSakura, 800);
             }
         }
 
-        // 添加单个樱花
         function addSakura() {
-            // 只有在粉色主题下才添加樱花
             if (!document.body.classList.contains('dark-mode')) {
                 return;
             }
@@ -533,37 +548,29 @@
             const sakura = document.createElement('div');
             sakura.classList.add('sakura');
             
-            // 随机大小
             const size = Math.random() * 8 + 3;
             sakura.style.width = `${size}px`;
             sakura.style.height = `${size}px`;
             
-            // 随机位置
             sakura.style.left = `${Math.random() * 100}vw`;
             sakura.style.top = `-${size}px`;
             
-            // 随机水平偏移距离
             const horizontalDistance = (Math.random() - 0.5) * 200;
             sakura.style.setProperty('--horizontal-distance', horizontalDistance);
             
-            // 随机旋转角度
             sakura.style.transform = `rotate(${Math.random() * 360}deg)`;
             
-            // 随机动画持续时间
             const duration = Math.random() * 10 + 10;
             sakura.style.animationDuration = `${duration}s`;
             
-            // 随机动画延迟
             sakura.style.animationDelay = `${Math.random() * 10}s`;
             
-            // 粉色主题下的樱花颜色
-            const hue = Math.random() * 20 + 340; // 粉色色调范围
+            const hue = Math.random() * 20 + 340;
             const lightness = Math.random() * 10 + 85;
             sakura.style.backgroundColor = `hsl(${hue}, 100%, ${lightness}%)`;
             
             sakuraContainer.appendChild(sakura);
             
-            // 动画结束后移除元素
             setTimeout(() => {
                 sakura.remove();
             }, (duration + 1) * 1000);
@@ -571,3 +578,4 @@
     </script>
 </body>
 </html>
+    
