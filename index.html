@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>我的个人主页</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         /* 基础样式与颜色设置 - 蓝色主题为默认 */
         :root {
@@ -69,6 +70,87 @@
             }
             100% {
                 transform: translate(calc(var(--horizontal-distance) * 1px), 100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* 电子木鱼样式 */
+        .wooden-fish {
+            position: fixed;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 90;
+            transition: all 0.3s ease;
+        }
+
+        .fish-icon {
+            width: 80px;
+            height: 80px;
+            background-color: #e6c8a0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transition: all 0.1s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .fish-icon::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.3), transparent 60%);
+            pointer-events: none;
+        }
+
+        .fish-icon i {
+            font-size: 36px;
+            color: #8b5a2b;
+        }
+
+        .fish-icon:active {
+            transform: scale(0.95);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .merit-count {
+            margin-top: 15px;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 8px 15px;
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            font-weight: bold;
+            color: #8b5a2b;
+        }
+
+        .merit-popup {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #d4af37;
+            font-weight: bold;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translate(-50%, 0);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-50%, -30px);
                 opacity: 0;
             }
         }
@@ -253,11 +335,36 @@
         .dark-mode .profile-img:hover {
             box-shadow: 0 0 20px rgba(255,158,177,0.3);
         }
+
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .wooden-fish {
+                left: 10px;
+            }
+            
+            .fish-icon {
+                width: 60px;
+                height: 60px;
+            }
+            
+            .fish-icon i {
+                font-size: 24px;
+            }
+        }
     </style>
 </head>
 <body>
     <!-- 深色模式切换按钮 -->
     <button class="theme-toggle" onclick="toggleTheme()">切换主题</button>
+
+    <!-- 电子木鱼区域 -->
+    <div class="wooden-fish">
+        <div class="fish-icon" id="fishIcon">
+            <i class="fas fa-drum"></i>
+            <div class="merit-popup" id="meritPopup">功德+1</div>
+        </div>
+        <div class="merit-count">功德: <span id="meritCount">0</span></div>
+    </div>
 
     <!-- 樱花效果容器 -->
     <div class="sakura-container" id="sakuraContainer"></div>
@@ -312,6 +419,7 @@
             <li>GitHub：<a href="https://github.com/你的GitHub用户名" target="_blank">github.com/YifeiYao77</a></li>
         </ul>
     </div>
+
     <script>
         // 电子木鱼功能
         let meritCount = 0;
@@ -353,7 +461,7 @@
             // 播放敲击音效
             createSound();
         });
-    <script>
+
         // 主题切换功能
         function toggleTheme() {
             document.body.classList.toggle('dark-mode');
