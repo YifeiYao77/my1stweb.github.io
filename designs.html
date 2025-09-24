@@ -282,6 +282,29 @@
             margin: 0;
         }
 
+        /* 空状态提示样式 */
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: var(--text-color);
+        }
+        
+        .empty-state i {
+            font-size: 60px;
+            color: var(--secondary-color);
+            margin-bottom: 20px;
+        }
+        
+        .empty-state p {
+            margin: 10px 0;
+        }
+        
+        .empty-state .tip {
+            font-size: 12px;
+            color: #888;
+            margin-top: 20px;
+        }
+
         /* PDF查看器弹窗 */
         .pdf-viewer {
             position: fixed;
@@ -429,48 +452,16 @@
     </div>
 
     <div class="content">
+        <!-- PDF画廊容器（动态填充内容） -->
         <div class="pdf-gallery" id="pdfGallery">
-            <!-- PDF作品项1 -->
-            <div class="pdf-item" data-pdf="作品1.pdf">
-                <i class="fas fa-file-pdf pdf-icon"></i>
-                <h3 class="pdf-title">课程报告1</h3>
-                <p class="pdf-description">计算机图形学课程设计报告，包含详细实现过程</p>
-            </div>
-            
-            <!-- PDF作品项2 -->
-            <div class="pdf-item" data-pdf="作品2.pdf">
-                <i class="fas fa-file-pdf pdf-icon"></i>
-                <h3 class="pdf-title">UI设计方案</h3>
-                <p class="pdf-description">移动应用界面设计方案，包含原型与视觉设计</p>
-            </div>
-            
-            <!-- PDF作品项3 -->
-            <div class="pdf-item" data-pdf="作品3.pdf">
-                <i class="fas fa-file-pdf pdf-icon"></i>
-                <h3 class="pdf-title">研究论文</h3>
-                <p class="pdf-description">相关领域研究论文，包含实验数据与分析</p>
-            </div>
-            
-            <!-- PDF作品项4 -->
-            <div class="pdf-item" data-pdf="作品4.pdf">
-                <i class="fas fa-file-pdf pdf-icon"></i>
-                <h3 class="pdf-title">毕业设计</h3>
-                <p class="pdf-description">毕业设计完整文档，包含全部设计与实现细节</p>
-            </div>
-            
-            <!-- PDF作品项5 -->
-            <div class="pdf-item" data-pdf="作品5.pdf">
-                <i class="fas fa-file-pdf pdf-icon"></i>
-                <h3 class="pdf-title">创意作品集</h3>
-                <p class="pdf-description">各类创意设计作品集合，包含草图与成品展示</p>
-            </div>
-            
-            <!-- PDF作品项6 -->
-            <div class="pdf-item" data-pdf="作品6.pdf">
-                <i class="fas fa-file-pdf pdf-icon"></i>
-                <h3 class="pdf-title">项目计划书</h3>
-                <p class="pdf-description">完整的项目规划与实施计划文档</p>
-            </div>
+            <!-- 这里的内容会通过JS动态生成，无需手动添加 -->
+        </div>
+        <!-- 空状态提示（无PDF时显示） -->
+        <div class="empty-state" id="emptyState" style="display: none;">
+            <i class="fas fa-file-pdf"></i>
+            <h3>暂无PDF作品</h3>
+            <p>请将PDF文件按规则命名后放入网站根目录</p>
+            <p class="tip">命名规则：1. PDF文件：「课程报告1.pdf」「UI设计方案.pdf」；2. 描述文件（可选）：「课程报告1_描述.txt」（内容为作品简介）</p>
         </div>
     </div>
 
@@ -491,171 +482,3 @@
         const resetButton = document.getElementById('resetMerit');
         
         // 初始化显示保存的功德值
-        meritCountElement.textContent = meritCount;
-        
-        // 创建敲击音效
-        const createSound = () => {
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-            
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            
-            oscillator.type = 'sine';
-            oscillator.frequency.setValueAtTime(500, audioContext.currentTime);
-            oscillator.frequency.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
-            
-            gainNode.gain.setValueAtTime(1, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
-            
-            oscillator.start();
-            oscillator.stop(audioContext.currentTime + 0.5);
-        };
-        
-        // 点击木鱼事件
-        fishIcon.addEventListener('click', () => {
-            meritCount++;
-            meritCountElement.textContent = meritCount;
-            localStorage.setItem('muyuMeritCount', meritCount.toString());
-            
-            meritPopup.style.animation = 'none';
-            meritPopup.offsetHeight;
-            meritPopup.style.animation = 'floatUp 0.8s ease-out forwards';
-            
-            createSound();
-        });
-        
-        // 重置功德按钮事件
-        resetButton.addEventListener('click', () => {
-            if (confirm('确定要重置功德计数吗？')) {
-                meritCount = 0;
-                meritCountElement.textContent = meritCount;
-                localStorage.removeItem('muyuMeritCount');
-            }
-        });
-
-        // PDF查看功能
-        const pdfGallery = document.getElementById('pdfGallery');
-        const pdfViewer = document.getElementById('pdfViewer');
-        const pdfEmbed = document.getElementById('pdfEmbed');
-        const closePdf = document.getElementById('closePdf');
-        
-        // 点击PDF项打开查看器
-        pdfGallery.addEventListener('click', (e) => {
-            const pdfItem = e.target.closest('.pdf-item');
-            if (pdfItem) {
-                const pdfUrl = pdfItem.getAttribute('data-pdf');
-                // 设置PDF源
-                pdfEmbed.src = pdfUrl;
-                // 显示查看器
-                pdfViewer.classList.add('active');
-                // 阻止页面滚动
-                document.body.style.overflow = 'hidden';
-            }
-        });
-        
-        // 关闭PDF查看器
-        closePdf.addEventListener('click', () => {
-            pdfViewer.classList.remove('active');
-            pdfEmbed.src = '';
-            // 恢复页面滚动
-            document.body.style.overflow = '';
-        });
-        
-        // 点击查看器外部关闭
-        pdfViewer.addEventListener('click', (e) => {
-            if (e.target === pdfViewer) {
-                pdfViewer.classList.remove('active');
-                pdfEmbed.src = '';
-                document.body.style.overflow = '';
-            }
-        });
-
-        // 主题切换功能
-        function toggleTheme() {
-            document.body.classList.toggle('dark-mode');
-            if (document.body.classList.contains('dark-mode')) {
-                localStorage.setItem('theme', 'dark');
-                createSakuras();
-            } else {
-                localStorage.setItem('theme', 'light');
-                clearSakuras();
-            }
-        }
-
-        // 页面加载时恢复保存的主题
-        window.onload = function() {
-            if (localStorage.getItem('theme') === 'dark') {
-                document.body.classList.add('dark-mode');
-                createSakuras();
-                startSakuraInterval();
-            } else {
-                clearSakuras();
-            }
-        }
-
-        // 樱花效果实现
-        const sakuraContainer = document.getElementById('sakuraContainer');
-        const totalSakuras = 60;
-        let sakuraInterval;
-
-        function createSakuras() {
-            clearSakuras();
-            for (let i = 0; i < totalSakuras; i++) {
-                addSakura();
-            }
-        }
-
-        function clearSakuras() {
-            sakuraContainer.innerHTML = '';
-            if (sakuraInterval) {
-                clearInterval(sakuraInterval);
-                sakuraInterval = null;
-            }
-        }
-
-        function startSakuraInterval() {
-            if (!sakuraInterval) {
-                sakuraInterval = setInterval(addSakura, 800);
-            }
-        }
-
-        function addSakura() {
-            if (!document.body.classList.contains('dark-mode')) {
-                return;
-            }
-            
-            const sakura = document.createElement('div');
-            sakura.classList.add('sakura');
-            
-            const size = Math.random() * 8 + 3;
-            sakura.style.width = `${size}px`;
-            sakura.style.height = `${size}px`;
-            
-            sakura.style.left = `${Math.random() * 100}vw`;
-            sakura.style.top = `-${size}px`;
-            
-            const horizontalDistance = (Math.random() - 0.5) * 200;
-            sakura.style.setProperty('--horizontal-distance', horizontalDistance);
-            
-            sakura.style.transform = `rotate(${Math.random() * 360}deg)`;
-            
-            const duration = Math.random() * 10 + 10;
-            sakura.style.animationDuration = `${duration}s`;
-            
-            sakura.style.animationDelay = `${Math.random() * 10}s`;
-            
-            const hue = Math.random() * 20 + 340;
-            const lightness = Math.random() * 10 + 85;
-            sakura.style.backgroundColor = `hsl(${hue}, 100%, ${lightness}%)`;
-            
-            sakuraContainer.appendChild(sakura);
-            
-            setTimeout(() => {
-                sakura.remove();
-            }, (duration + 1) * 1000);
-        }
-    </script>
-</body>
-</html>
