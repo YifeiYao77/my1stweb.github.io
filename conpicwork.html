@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>计算机图形学作业 | yyf的网页</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: "微软雅黑", Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            color: #333;
+        }
+        
+        .header {
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .header a {
+            color: #0066cc;
+            text-decoration: none;
+            font-size: 1.2em;
+        }
+        
+        h1, h2, h3 {
+            color: #2c3e50;
+            margin-top: 30px;
+        }
+        
+        h1 {
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+        
+        h2 {
+            font-size: 1.5em;
+            margin-top: 40px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        h3 {
+            font-size: 1.2em;
+            margin-top: 25px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0 25px;
+        }
+        
+        td {
+            padding: 10px 15px;
+            border: 1px solid #eee;
+        }
+        
+        a {
+            color: #0066cc;
+            text-decoration: none;
+        }
+        
+        a:hover {
+            text-decoration: underline;
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #0066cc;
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 600px) {
+            table, td {
+                display: block;
+                width: 100%;
+            }
+            
+            td {
+                box-sizing: border-box;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="index.html"><i class="fas fa-home"></i> yyf的个人主页</a>
+    </div>
+    
+    <h1>计算机图形学作业</h1>
+    
+    <h2>实验作业</h2>
+    
+    <h3>实验一：WebGL基础绘图</h3>
+    <table>
+        <tr>
+            <td><a href="https://YifeiYao77.github.io/webgl-homework/task1.html"><i class="fas fa-file-code"></i> Task1：修改三角形颜色</a></td>
+            <td><a href="https://YifeiYao77.github.io/webgl-homework/task2.html"><i class="fas fa-file-code"></i> Task2：绘制绿色四边形</a></td>
+            <td><a href="https://YifeiYao77.github.io/webgl-homework/task3.html"><i class="fas fa-file-code"></i> Task3：同色图形组合</a></td>
+        </tr>
+        <tr>
+            <td><a href="https://YifeiYao77.github.io/webgl-homework/task4.html"><i class="fas fa-file-code"></i> Task4：异色图形组合</a></td>
+            <td><a href="https://YifeiYao77.github.io/webgl-homework/task5.html"><i class="fas fa-file-code"></i> Task5：可变大小渐变三角形</a></td>
+            <td><a href="https://github.com/YifeiYao77/你的作业仓库名"><i class="fab fa-github"></i> 源代码</a></td>
+        </tr>
+    </table>
+    
+    <h3>实验二：变换与动画</h3>
+    <table>
+        <tr>
+            <td><a href="https://YifeiYao77.github.io/webgl-homework2/task1.html"><i class="fas fa-file-code"></i> Task1：基础变换</a></td>
+            <td><a href="https://YifeiYao77.github.io/webgl-homework2/task2.html"><i class="fas fa-file-code"></i> Task2：复合变换</a></td>
+            <td><a href="https://YifeiYao77.github.io/webgl-homework2/task3.html"><i class="fas fa-file-code"></i> Task3：简单动画</a></td>
+        </tr>
+        <tr>
+            <td><a href="https://github.com/YifeiYao77/你的作业2仓库名"><i class="fab fa-github"></i> 源代码</a></td>
+            <td></td>
+            <td></td>
+        </tr>
+    </table>
+    
+    <h3>实验三：纹理与光照（待完成）</h3>
+    <table>
+        <tr>
+            <td>Task1：纹理映射</td>
+            <td>Task2：基础光照</td>
+            <td>Task3：材质效果</td>
+        </tr>
+    </table>
+    
+    
+
+    <script>
+        // 简单的页面加载动画效果
+        document.addEventListener('DOMContentLoaded', function() {
+            const links = document.querySelectorAll('a');
+            links.forEach(link => {
+                link.style.transition = 'color 0.2s ease';
+                link.addEventListener('mouseover', function() {
+                    this.style.color = '#004499';
+                });
+                link.addEventListener('mouseout', function() {
+                    this.style.color = '#0066cc';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+    
