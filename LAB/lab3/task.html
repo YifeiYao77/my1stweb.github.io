@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>正方形变换集成演示（全功能显示）</title>
+    <style>
+        canvas { border: 1px solid black; margin-top: 10px; }
+        .control-panel { margin: 10px 0; padding: 10px; border: 1px solid #ccc; }
+        .control-group { margin: 15px 0; padding-left: 5px; border-left: 3px solid #666; }
+        h3 { margin: 5px 0; color: #333; }
+        .group { margin: 8px 0; }
+        label { display: inline-block; width: 100px; }
+    </style>
+</head>
+<body>
+    <h2>正方形变换控制（全功能）</h2>
+
+    <!-- 平移控制（直接显示） -->
+    <div class="control-panel">
+        <h3>平移控制</h3>
+        <div class="group">
+            <label>X轴平移:</label>
+            <input type="range" id="tx" min="-1" max="1" step="0.01" value="0">
+            <span id="txValue">0</span>
+        </div>
+        <div class="group">
+            <label>Y轴平移:</label>
+            <input type="range" id="ty" min="-1" max="1" step="0.01" value="0">
+            <span id="tyValue">0</span>
+        </div>
+    </div>
+
+    <!-- 旋转控制（直接显示） -->
+    <div class="control-panel">
+        <h3>旋转控制</h3>
+        <div class="group">
+            <label>Z轴角度:</label>
+            <input type="range" id="rotateZ" min="0" max="360" step="1" value="0">
+            <span id="rotateValue">0°</span>
+        </div>
+    </div>
+
+    <!-- 缩放控制（直接显示） -->
+    <div class="control-panel">
+        <h3>缩放控制</h3>
+        <div class="group">
+            <label>缩放轴:</label>
+            <select id="scaleAxis">
+                <option value="all">X+Y轴</option>
+                <option value="x">仅X轴</option>
+                <option value="y">仅Y轴</option>
+            </select>
+        </div>
+        <div class="group">
+            <label>缩放值:</label>
+            <input type="range" id="scaleValue" min="0.1" max="2" step="0.1" value="1">
+            <span id="scaleNum">1</span>
+        </div>
+    </div>
+
+    <canvas id="gl-canvas" width="512" height="512"></canvas>
+
+    <!-- 顶点着色器：新增颜色属性 -->
+<script id="vertex-shader" type="x-shader/x-vertex">
+    attribute vec4 a_Position;
+    attribute vec4 a_Color;    // 新增：顶点颜色属性
+    uniform vec2 u_Translate;
+    uniform float u_RotateZ;
+    uniform vec2 u_Scale;
+    varying vec4 v_Color;      // 新增：传递颜色到片段着色器
+    void main() {
+        // 原有变换矩阵（缩放→旋转→平移）
+        mat4 scaleMat = mat4(u_Scale.x,0,0,0, 0,u_Scale.y,0,0, 0,0,1,0, 0,0,0,1);
+        mat4 rotMat = mat4(cos(u_RotateZ),-sin(u_RotateZ),0,0, sin(u_RotateZ),cos(u_RotateZ),0,0, 0,0,1,0, 0,0,0,1);
+        mat4 transMat = mat4(1,0,0,0, 0,1,0,0, 0,0,1,0, u_Translate.x,u_Translate.y,0,1);
+        gl_Position = transMat * rotMat * scaleMat * a_Position;
+        v_Color = a_Color;      // 传递颜色
+    }
+</script>
+<!-- 片段着色器：使用顶点传递的颜色 -->
+<script id="fragment-shader" type="x-shader/x-fragment">
+    precision mediump float;
+    varying vec4 v_Color;  // 接收顶点着色器的颜色
+    void main() {
+        gl_FragColor = v_Color;  // 用顶点颜色渲染
+    }
+</script>
+
+    <!-- 引入工具库和业务逻辑 -->
+    <script  type="text/javascript" src="common/webgl-utils.js"></script>    <!-- 来源：原有WebGL工具库 -->
+    <script  type="text/javascript" src="common/initShaders.js"></script>   <!-- 来源：原有着色器初始化工具 -->
+    <script  type="text/javascript" src="js/transform-square-visible.js"></script>  <!-- 独立JS逻辑 -->
+</body>
+</html>
