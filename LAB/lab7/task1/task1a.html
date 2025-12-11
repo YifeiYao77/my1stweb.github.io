@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task 1a: Recursive Subdivision Sphere</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+            text-align: center;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        canvas {
+            border: 1px solid #333;
+            background-color: #000;
+        }
+        .info {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Task 1a: Recursive Subdivision Sphere</h1>
+        <canvas id="gl-canvas" width="800" height="600"></canvas>
+        <div class="info">
+            <p>Recursive subdivision sphere with depth = 3</p>
+            <p>Initial shape: regular tetrahedron inscribed in unit sphere</p>
+            <p>Use mouse to rotate the sphere</p>
+        </div>
+    </div>
+
+    <script id="vertex-shader" type="x-shader/x-vertex">
+        attribute vec3 aPosition;
+
+        uniform mat4 uProjectionMatrix;
+        uniform mat4 uModelViewMatrix;
+
+        void main() {
+            gl_Position = uProjectionMatrix * uModelViewMatrix * vec4(aPosition, 1.0);
+        }
+        </script>
+
+    <script id="fragment-shader" type="x-shader/x-fragment">
+        precision mediump float;
+
+        void main() {
+            // Use solid white color for wireframe visualization
+            gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+        }
+        </script>
+
+    <script>
+        let gl;
+        let shaderProgram;
+        let sphereVertexBuffer;
+        let sphereNormalBuffer;
+        let sphereIndexBuffer;
+        let indexCount;
+
+        // Matrix uniforms
+        let uProjectionMatrix;
+        let uModelViewMatrix;
+
+        // Camera parameters
+        let cameraDistance = 5.0;
+        let cameraAngleX = 0.0;
+        let cameraAngleY = 0.0;
+        let isDragging = false;
+        let lastMouseX = 0;
+        let lastMouseY = 0;
+
+        // Recursive subdivision depth
+        const SUBDIVISION_DEPTH = 3;
+
+        // Initialize WebGL
+        function initWebGL() {
+            const canvas = document.getElementById('gl-canvas');
+            gl = canvas.getContext('webgl2') || canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+
+            if (!gl) {
+                alert('WebGL not supported!');
+                return;
+            }
+
+            gl.clearColor(0.0, 0.0, 0.0, 1.0);
+            gl.enable(gl.DEPTH_TEST);
+            gl.viewport(0, 0, canvas.width, canvas.height);
+            
+            // Set wireframe mode for better visualization of the sphere construction
+            if (gl.polygonMode) {
+                gl.polygonMode(gl.FRONT_AND_BACK, gl.LINE);
+            }
+        }
+
+        // Create and compile shader
+        function createShader(gl, type, source) {
+            const shader = gl.createShader(type);
+            gl.shaderSource(shader, source);
+            gl.compileShader(shader);
+
+            if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                console.error('Error compiling shader:', gl.getShaderInfoLog(shader));
+                gl.deleteShader(shader);
+                return null;
+            }
+
+            return shader;
+        }
+
+        // Initialize shaders
+        function initShaders() {
+            const vertexShaderSource = document.getElementById('vertex-shader').text;
+            const fragmentShaderSource = document.getElementById('fragment-shader').text;
+
+            const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
+            const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
+
+            shaderProgram = gl.createProgram();
+            gl.attachShader(shaderProgram, vertexShader);
+            gl.attachShader(shaderProgram, fragmentShader);
+            gl.linkProgram(shaderProgram);
+
+            if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+                console.error('Unable to initialize shader program:', gl.getProgramInfoLog(shaderProgram));
+                return;
+            }
+
+            gl.useProgram(shaderProgram);
+
+            // Get attribute locations
+            shaderProgram.aPosition = gl.getAttribLocation(shaderProgram, 'aPosition');
+            gl.enableVertexAttribArray(shaderProgram.aPosition);
+
+            shaderProgram.aNormal = gl.getAttribLocation(shaderProgram, 'aNormal');
+            gl.enableVertexAttribArray(shaderProgram.aNormal);
+
+            // Get uniform locations
+            uProjectionMatrix = gl.getUniformLocation(shaderProgram, 'uProjectionMatrix');
+            uModelViewMatrix = gl.getUniformLocation(shaderProgram, 'uModelViewMatrix');
+        }
+
+        // Create a unit vector from given x, y, z
+        function Vector3(x, y, z) {
+            return { x, y, z };
+        }
+
+        // Vector3 addition
+        function addVectors(v1, v2) {
+            return Vector3(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z);
+        }
+
+        // Vector3 normalization
+        function normalizeVector(v) {
+            const length = Math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
+            return Vector3(v.x / length, v.y / length, v.z / length);
+        }
+
+        // Create initial regular tetrahedron
+        function createTetrahedron() {
+            const vertices = [
+                Vector3(1, 1, 1),
+                Vector3(-1, -1, 1),
+                Vector3(-1, 1, -1),
+                Vector3(1, -1, -1)
+            ];
+
+            // Normalize vertices to unit sphere
+            const normalizedVertices = vertices.map(vertex => normalizeVector(vertex));
+
+            // Tetrahedron faces
+            const faces = [
+                [0, 1, 2],
+                [0, 2, 3],
+                [0, 3, 1],
+                [1, 3, 2]
+            ];
+
+            return { vertices: normalizedVertices, faces: faces };
+        }
+
+        // Recursive subdivision function
+        function subdivide(vertices, faces, depth) {
+            if (depth <= 0) {
+                return { vertices, faces };
+            }
+
+            const newVertices = [...vertices];
+            const newFaces = [];
+            const edgeMidpoints = new Map();
+
+            // Get midpoint of edge, create if doesn't exist
+            const getMidpoint = (v1, v2) => {
+                const edgeKey = `${Math.min(v1, v2)}-${Math.max(v1, v2)}`;
+                
+                if (edgeMidpoints.has(edgeKey)) {
+                    return edgeMidpoints.get(edgeKey);
+                }
+
+                const midpoint = normalizeVector(addVectors(vertices[v1], vertices[v2]));
+                const index = newVertices.length;
+                newVertices.push(midpoint);
+                edgeMidpoints.set(edgeKey, index);
+                
+                return index;
+            };
+
+            // Subdivide each face
+            faces.forEach(face => {
+                const [a, b, c] = face;
+                
+                // Calculate midpoints
+                const ab = getMidpoint(a, b);
+                const bc = getMidpoint(b, c);
+                const ca = getMidpoint(c, a);
+                
+                // Create new faces
+                newFaces.push([a, ab, ca]);
+                newFaces.push([b, bc, ab]);
+                newFaces.push([c, ca, bc]);
+                newFaces.push([ab, bc, ca]);
+            });
+
+            return subdivide(newVertices, newFaces, depth - 1);
+        }
+
+        // Create sphere geometry using recursive subdivision
+        function createSubdivisionSphere(depth) {
+            // Start with tetrahedron
+            const tetrahedron = createTetrahedron();
+            // Subdivide recursively
+            const { vertices, faces } = subdivide(tetrahedron.vertices, tetrahedron.faces, depth);
+
+            const flattenedVertices = [];
+            const flattenedNormals = [];
+            const indices = [];
+
+            // Flatten vertices and normals (normal is same as position for unit sphere)
+            vertices.forEach(vertex => {
+                flattenedVertices.push(vertex.x, vertex.y, vertex.z);
+                flattenedNormals.push(vertex.x, vertex.y, vertex.z);
+            });
+
+            // Flatten indices
+            faces.forEach(face => {
+                indices.push(face[0], face[1], face[2]);
+            });
+
+            return {
+                vertices: flattenedVertices,
+                normals: flattenedNormals,
+                indices: indices
+            };
+        }
+
+        // Initialize sphere buffers
+        function initSphereBuffers() {
+            const sphere = createSubdivisionSphere(SUBDIVISION_DEPTH);
+
+            // Vertex buffer
+            sphereVertexBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, sphereVertexBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(sphere.vertices), gl.STATIC_DRAW);
+
+            // Normal buffer
+            sphereNormalBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, sphereNormalBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(sphere.normals), gl.STATIC_DRAW);
+
+            // Index buffer
+            sphereIndexBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, sphereIndexBuffer);
+            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(sphere.indices), gl.STATIC_DRAW);
+
+            indexCount = sphere.indices.length;
+        }
+
+        // Matrix multiplication helper
+        function multiplyMatrices(a, b) {
+            const result = [];
+            for (let i = 0; i < 4; i++) {
+                for (let j = 0; j < 4; j++) {
+                    let sum = 0;
+                    for (let k = 0; k < 4; k++) {
+                        sum += a[i * 4 + k] * b[k * 4 + j];
+                    }
+                    result[i * 4 + j] = sum;
+                }
+            }
+            return result;
+        }
+
+        // Create perspective projection matrix
+        function createPerspectiveMatrix(fov, aspect, near, far) {
+            const f = 1.0 / Math.tan(fov / 2);
+            const rangeInv = 1 / (near - far);
+
+            return [
+                f / aspect, 0, 0, 0,
+                0, f, 0, 0,
+                0, 0, (near + far) * rangeInv, -1,
+                0, 0, near * far * rangeInv * 2, 0
+            ];
+        }
+
+        // Create translation matrix
+        function createTranslationMatrix(x, y, z) {
+            return [
+                1, 0, 0, 0,
+                0, 1, 0, 0,
+                0, 0, 1, 0,
+                x, y, z, 1
+            ];
+        }
+
+        // Create rotation matrix around X axis
+        function createRotationXMatrix(angle) {
+            const c = Math.cos(angle);
+            const s = Math.sin(angle);
+
+            return [
+                1, 0, 0, 0,
+                0, c, s, 0,
+                0, -s, c, 0,
+                0, 0, 0, 1
+            ];
+        }
+
+        // Create rotation matrix around Y axis
+        function createRotationYMatrix(angle) {
+            const c = Math.cos(angle);
+            const s = Math.sin(angle);
+
+            return [
+                c, 0, -s, 0,
+                0, 1, 0, 0,
+                s, 0, c, 0,
+                0, 0, 0, 1
+            ];
+        }
+
+        // Draw scene
+        function draw() {
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+            // Projection matrix
+            const canvas = document.getElementById('gl-canvas');
+            const projectionMatrix = createPerspectiveMatrix(
+                45 * Math.PI / 180,
+                canvas.width / canvas.height,
+                0.1,
+                100.0
+            );
+
+            // Model-view matrix
+            let modelViewMatrix = createTranslationMatrix(0, 0, -cameraDistance);
+            modelViewMatrix = multiplyMatrices(modelViewMatrix, createRotationYMatrix(cameraAngleY));
+            modelViewMatrix = multiplyMatrices(modelViewMatrix, createRotationXMatrix(cameraAngleX));
+
+            // Set uniforms
+            gl.uniformMatrix4fv(uProjectionMatrix, false, projectionMatrix);
+            gl.uniformMatrix4fv(uModelViewMatrix, false, modelViewMatrix);
+
+            // Bind vertex buffer
+            gl.bindBuffer(gl.ARRAY_BUFFER, sphereVertexBuffer);
+            gl.vertexAttribPointer(shaderProgram.aPosition, 3, gl.FLOAT, false, 0, 0);
+
+            // Bind normal buffer
+            gl.bindBuffer(gl.ARRAY_BUFFER, sphereNormalBuffer);
+            gl.vertexAttribPointer(shaderProgram.aNormal, 3, gl.FLOAT, false, 0, 0);
+
+            // Bind index buffer
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, sphereIndexBuffer);
+
+            // Draw sphere
+            gl.drawElements(gl.TRIANGLES, indexCount, gl.UNSIGNED_SHORT, 0);
+        }
+
+        // Mouse event handlers for camera control
+        function handleMouseDown(event) {
+            isDragging = true;
+            lastMouseX = event.clientX;
+            lastMouseY = event.clientY;
+        }
+
+        function handleMouseMove(event) {
+            if (!isDragging) return;
+
+            const deltaX = event.clientX - lastMouseX;
+            const deltaY = event.clientY - lastMouseY;
+
+            cameraAngleY += deltaX * 0.01;
+            cameraAngleX += deltaY * 0.01;
+
+            lastMouseX = event.clientX;
+            lastMouseY = event.clientY;
+
+            draw();
+        }
+
+        function handleMouseUp() {
+            isDragging = false;
+        }
+
+        // Animation loop
+        function animate() {
+            // Remove auto-rotation, allow user to control with mouse
+            draw();
+            requestAnimationFrame(animate);
+        }
+
+        // Initialize everything
+        function init() {
+            initWebGL();
+            initShaders();
+            initSphereBuffers();
+
+            // Setup mouse event listeners
+            const canvas = document.getElementById('gl-canvas');
+            canvas.addEventListener('mousedown', handleMouseDown);
+            canvas.addEventListener('mousemove', handleMouseMove);
+            canvas.addEventListener('mouseup', handleMouseUp);
+            canvas.addEventListener('mouseout', handleMouseUp);
+
+            // Start animation
+            animate();
+        }
+
+        // Initialize when page loads
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
