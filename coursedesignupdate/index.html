@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>情绪控制 - 3D交互游戏</title>
+    <link rel="icon" href="data:;base64,=">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f0f0;
+        }
+        
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+        
+        #ui-overlay {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 16px;
+            z-index: 100;
+            min-width: 200px;
+        }
+        
+        #core-value {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #ffeb3b;
+        }
+        
+        #game-status {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        
+        #instructions {
+            font-size: 14px;
+            margin-top: 15px;
+            line-height: 1.5;
+        }
+        
+        .status-playing { color: #4caf50; }
+        .status-success { color: #8bc34a; }
+        .status-failed { color: #f44336; }
+        
+        /* 预加载页面样式 */
+        #preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.9);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        #preloader-content {
+            max-width: 1000px;
+            padding: 40px;
+            background-color: rgba(30, 30, 40, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(0, 100, 255, 0.5);
+            border: 2px solid rgba(0, 150, 255, 0.3);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+        
+        #emotion-objects,
+        #game-instructions {
+            flex: 1 0 45%;
+            min-width: 300px;
+        }
+        
+        #start-prompt {
+            flex: 1 0 100%;
+            margin-top: 20px;
+        }
+
+        #preloader h1 {
+            flex: 1 0 100%;
+            text-align: center;
+            color: #00aaff;
+            margin-bottom: 20px;
+            font-size: 32px;
+            text-shadow: 0 0 10px rgba(0, 170, 255, 0.8);
+        }
+        
+        #preloader h2 {
+            color: #00ccff;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            font-size: 24px;
+            border-bottom: 2px solid rgba(0, 200, 255, 0.3);
+            padding-bottom: 5px;
+        }
+        
+        #preloader h3 {
+            color: #66d9ff;
+            margin-top: 10px;
+            margin-bottom: 5px;
+            font-size: 18px;
+        }
+        
+        #preloader p {
+            color: #cccccc;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+        
+        #preloader ul {
+            color: #cccccc;
+            line-height: 1.6;
+            margin-left: 20px;
+        }
+        
+        #preloader li {
+            margin-bottom: 5px;
+        }
+        
+        /* 情绪对象介绍样式 */
+        #emotion-objects {
+            margin-bottom: 30px;
+        }
+        
+        .emotion-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: rgba(50, 50, 70, 0.7);
+            border-radius: 10px;
+            border: 1px solid rgba(0, 150, 255, 0.2);
+        }
+        
+        .emotion-color {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            margin-right: 15px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+        
+        .emotion-info {
+            flex: 1;
+        }
+        
+        /* 游戏玩法说明样式 */
+        #game-instructions {
+            margin-bottom: 30px;
+        }
+        
+        /* 开始提示样式 */
+        #start-prompt {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            background-color: rgba(0, 100, 255, 0.2);
+            border-radius: 10px;
+            border: 2px dashed rgba(119, 175, 203, 0.801);
+        }
+        
+        #start-prompt h2 {
+            color: #00ffaa;
+            font-size: 28px;
+            text-shadow: 0 0 15px rgba(0, 255, 170, 0.8);
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="preloader">
+        <div id="preloader-content">
+            <h1>情绪控制 - 3D交互游戏</h1>
+            
+            <div id="emotion-objects">
+                <h2>情绪对象介绍</h2>
+                
+                <div class="emotion-item">
+                    <div class="emotion-color" style="background-color: #4169e1;"></div>
+                    <div class="emotion-info">
+                        <h3>空虚 (Emptiness)</h3>
+                        <p>蓝色四面体，提供较高数值增益，但会导致短暂减速。同化空虚时，需保证内核数值大于空虚数值，否则游戏失败。</p>
+                    </div>
+                </div>
+                
+                <div class="emotion-item">
+                    <div class="emotion-color" style="background-color: #4caf50;"></div>
+                    <div class="emotion-info">
+                        <h3>愧疚 (Guilt)</h3>
+                        <p>绿色立方体，会降低内核数值。</p>
+                    </div>
+                </div>
+                
+                <div class="emotion-item">
+                    <div class="emotion-color" style="background-color: #9370db;"></div>
+                    <div class="emotion-info">
+                        <h3>焦虑 (Anxiety)</h3>
+                        <p>紫色锥体，会降低数值，且5秒内只能同化情绪碎片，否则导致游戏失败。</p>
+                    </div>
+                </div>
+                
+                <div class="emotion-item">
+                    <div class="emotion-color" style="background-color: #ffb6c1;"></div>
+                    <div class="emotion-info">
+                        <h3>情绪碎片 (Fragment)</h3>
+                        <p>粉色小球，提供小数值增益。</p>
+                    </div>
+                </div>
+                
+                <div class="emotion-item">
+                    <div class="emotion-color" style="background-color: #000000;"></div>
+                    <div class="emotion-info">
+                        <h3>崩溃 (Collapse)</h3>
+                        <p>黑色球体，碰撞将直接导致游戏失败。</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="game-instructions">
+                <h2>游戏玩法</h2>
+                <p>使用方向键控制内核移动，同化各种情绪对象，保持内核数值大于0。</p>
+                
+                <h3>操作指南</h3>
+                <ul>
+                    <li><strong>方向键</strong>: 移动内核</li>
+                    <li><strong>P键</strong>: 导出当前画面为PNG图像</li>
+                    <li><strong>空格键</strong>: 开始游戏</li>
+                </ul>
+                
+                <h3>游戏规则</h3>
+                <ul>
+                    <li>同化"空虚"可获得较高数值，但会导致短时间减速，注意同化空虚时，内核数值必须大于空虚数值，否则将导致游戏失败。</li>
+                    <li>同化"愧疚"和"焦虑"会减少内核数值</li>
+                    <li>同化"焦虑"后5s内不可同化其余情绪（碎片除外），否则导致游戏失败</li>
+                    <li>同化"情绪碎片"可获得小数值增益</li>
+                    <li>碰撞"崩溃"直接失败</li>
+                    <li>内核数值小于等于0时游戏失败</li>
+                    <li>同化所有空虚，愧疚，焦虑情绪即可获胜</li>
+                </ul>
+            </div>
+            
+            <div id="start-prompt">
+                <h2>按空格键开始游戏哦~</h2>
+            </div>
+        </div>
+    </div>
+    
+    <div id="game-container">
+        <div id="ui-overlay">
+            <div id="core-value">内核数值: 10</div>
+            <div id="game-status" class="status-playing">游戏进行中</div>
+            <div id="instructions">
+                <strong>操作说明:</strong><br>
+                方向键: 移动内核<br>
+                P键: 导出当前画面为PNG图像<br>
+                <br>
+                <strong>游戏目标:</strong><br>
+                同化所有情绪物体<br>
+                注意避开黑色"崩溃"球体<br>
+                保持内核数值>0
+            </div>
+        </div>
+    </div>
+    
+    <!-- 使用CDN版本的Three.js -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.182.0/build/three.module.js",
+            "three/examples/jsm/libs/tween.module.js": "https://unpkg.com/three@0.182.0/examples/jsm/libs/tween.module.js"
+        }
+    }
+    </script>
+    
+    <script type="module" src="/src/main.js"></script>
+</body>
+</html>

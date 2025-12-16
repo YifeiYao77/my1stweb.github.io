@@ -1,0 +1,69 @@
+{
+    "scene": {
+        "dimensions": {
+            "width": 50,
+            "height": 30,
+            "depth": 50
+        },
+        "wallColor": 13421772,
+        "lightColor": 16777215,
+        "lightIntensity": 1.0,
+        "lightPosition": {
+            "x": 0,
+            "y": 20,
+            "z": 0
+        }
+    },
+    "core": {
+        "radius": 1,
+        "color": 16777164,
+        "initialValue": 10,
+        "position": {
+            "x": 0,
+            "y": 1,
+            "z": 0
+        },
+        "speed": 3.0
+    },
+    "emotions": {
+        "emptiness": {
+            "count": 3,
+            "minValue": 15,
+            "maxValue": 35
+        },
+        "guilt": {
+            "count": 2,
+            "minValue": 10,
+            "maxValue": 20
+        },
+        "anxiety": {
+            "count": 2,
+            "minValue": 10,
+            "maxValue": 20
+        },
+        "fragment": {
+            "count": 30,
+            "value": 2,
+            "radius": 0.2
+        },
+        "collapse": {
+            "count": 4,
+            "radius": 1
+        }
+    },
+    "camera": {
+        "position": {
+            "x": 0,
+            "y": 30,
+            "z": 20
+        },
+        "lookAt": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+        },
+        "fov": 60,
+        "near": 0.1,
+        "far": 1000
+    }
+}
